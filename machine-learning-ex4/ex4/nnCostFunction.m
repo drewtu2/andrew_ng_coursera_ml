@@ -30,6 +30,10 @@ J = 0;
 Theta1_grad = zeros(size(Theta1));
 Theta2_grad = zeros(size(Theta2));
 
+% Prepend with ones for bias
+X = [ones(m, 1) X];
+
+
 % ====================== YOUR CODE HERE ======================
 % Instructions: You should complete the code by working through the
 %               following parts.
@@ -38,7 +42,46 @@ Theta2_grad = zeros(size(Theta2));
 %         variable J. After implementing Part 1, you can verify that your
 %         cost function computation is correct by verifying the cost
 %         computed in ex4.m
-%
+    function [h0, prediction] = forward_pass(X, Theta1, Theta2)
+        % Hypothesis function for a 3 layer neural net
+        % input - hidden - output
+        % X = num_examples x num_features + 1(bias)
+        % Theta1 = units_layer_2 x num_features_in_input + 1(bias)
+        % Theta2 = output_units x units_layer_2 + 1(bias)
+        a1 = X;
+        z2 = a1 * Theta1'; 
+        a2 = sigmoid(z2); 
+        a2 = [ones(m, 1) a2]; % Prep a2 for calculating a3 by adding bias
+        % size(a2) = num_examples x units_layer_2 + 1
+        
+        z3 = a2 * Theta2'; % size(z3) = num_examples x output_units
+       
+        h0 = sigmoid(z3);
+        [value, indices] = max(h0, [], 2);
+        prediction = indices;
+    end
+
+    function all_y = map_y(y, num_labels)
+        % Returns a (num_examples x num_labels) logical array
+        all_y = zeros(size(y, 1), num_labels);
+        
+        % Each column of all_y becomes a logical array representing whether
+        % each row in that column is equal to the index of that column. 
+        for label_index=1:num_labels
+            all_y(:, label_index) = (y == label_index);
+        end
+    end
+
+    all_y = map_y(y, num_labels);
+
+    % size(hypothesis) = (num_examples x output_units)
+    % size(all_y) = (num_examples x output_units)
+    
+    pos_term = -1 * all_y .* log(forward_pass(X, Theta1, Theta2)); 
+    neg_term = (1 - all_y) .* log(1 - forward_pass(X, Theta1, Theta2));
+
+    J = sum(sum(pos_term - neg_term))/m;
+
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
 %         the cost function with respect to Theta1 and Theta2 in Theta1_grad and
@@ -53,7 +96,32 @@ Theta2_grad = zeros(size(Theta2));
 %         Hint: We recommend implementing backpropagation using a for-loop
 %               over the training examples if you are implementing it for the 
 %               first time.
-%
+
+    % m = example_number
+    % k = class_number
+    
+    a1 = X;
+    z2 = a1 * Theta1'; 
+    a2 = sigmoid(z2); 
+    a2 = [ones(m, 1) a2]; % Prep a2 for calculating a3 by adding bias
+    % size(a2) = num_examples x units_layer_2 + 1
+
+    z3 = a2 * Theta2'; % size(z3) = num_examples x output_units
+    a3 = sigmoid(z3);  % a3 = mXk
+
+    all_y = map_y(y, num_labels); % size(all_y) = num_examples x output_unit
+    
+    delta3 = a3 - all_y;
+    
+    delta2 = ((Theta2(:, 2:end)'*delta3')');
+    delta2 = delta2.*sigmoidGradient(z2);
+    
+    delta2_accum = delta3'*a2;
+    delta1_accum = delta2'*a1;
+    
+    Theta2_grad = delta2_accum/m;
+    Theta1_grad = delta1_accum/m;
+    
 % Part 3: Implement regularization with the cost function and gradients.
 %
 %         Hint: You can implement this around the code for
@@ -62,23 +130,19 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+stripped_t1 = Theta1(:, 2:end);
+stripped_t2 = Theta2(:, 2:end);
 
+regularization = lambda/(2*m) * ...
+    (sum(sum(stripped_t1.^2)) + sum(sum(stripped_t2.^2)));
 
+J = J + regularization;
 
+grad1_reg = (lambda/m)*stripped_t1;
+grad2_reg = (lambda/m)*stripped_t2;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + grad1_reg;
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + grad2_reg;
 
 % -------------------------------------------------------------
 
