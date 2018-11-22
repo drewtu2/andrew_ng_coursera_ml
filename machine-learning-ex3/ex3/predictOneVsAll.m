@@ -30,13 +30,12 @@ X = [ones(m, 1) X];
 %       for each row.
 %       
 
+% X = (5000x401)
+% all_theta' = (401x10)
+% 5000x10 where each column represents "how close" something is to a given
+% theta. The class is the index that the theta is in. 
 
-
-
-
-
-
+[value, p] = max(X*all_theta', [], 2);
 % =========================================================================
-
 
 end

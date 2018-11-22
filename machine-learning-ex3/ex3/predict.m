@@ -10,6 +10,9 @@ num_labels = size(Theta2, 1);
 % You need to return the following variables correctly 
 p = zeros(size(X, 1), 1);
 
+% Add a 1 into X(0)
+X = [ones(m, 1) X];
+
 % ====================== YOUR CODE HERE ======================
 % Instructions: Complete the following code to make predictions using
 %               your learned neural network. You should set p to a 
@@ -22,13 +25,25 @@ p = zeros(size(X, 1), 1);
 %
 
 
+% X (Nx401)
+% Theta1 (25x401)
+% Theta2 (10x26)
 
+% Find the values of each weight times the corresponding input
+z2 = X*Theta1';
+% Apply the activation function to find the result of the first hidden
+% layer
+a2 = sigmoid(z2);
+% Add the bias into a1 to prep for use as input into second hidden layer
+a2 = [ones(m, 1) a2];
 
+% Find the values of each weight times the corresponding input
+z3 = a2*Theta2';
+% Apply the actiation function to find the result of the second hidden
+% layer
+a3 = sigmoid(z3);
 
-
-
-
-
+[v, p] = max(a3, [], 2);
 % =========================================================================
 
 

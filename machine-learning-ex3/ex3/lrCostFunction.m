@@ -5,6 +5,45 @@ function [J, grad] = lrCostFunction(theta, X, y, lambda)
 %   theta as the parameter for regularized logistic regression and the
 %   gradient of the cost w.r.t. to the parameters. 
 
+    function [J, grad] = costFunction(theta, X, y)
+    %COSTFUNCTION Compute cost and gradient for logistic regression
+    %   J = COSTFUNCTION(theta, X, y) computes the cost of using theta as the
+    %   parameter for logistic regression and the gradient of the cost
+    %   w.r.t. to the parameters.
+
+    % Initialize some useful values
+    m = length(y); % number of training examples
+
+    % You need to return the following variables correctly 
+    J = 0;
+    grad = zeros(size(theta));
+
+    % ====================== YOUR CODE HERE ======================
+    % Instructions: Compute the cost of a particular choice of theta.
+    %               You should set J to the cost.
+    %               Compute the partial derivatives and set grad to the partial
+    %               derivatives of the cost w.r.t. each parameter in theta
+    %
+    % Note: grad should have the same dimensions as theta
+    %
+
+        function h0 = hypothesis(X)
+           h0 = sigmoid(X*theta); 
+        end
+
+
+    pos_term = -1 * y .* log(hypothesis(X)); 
+    neg_term = (1 - y) .* log(1 - hypothesis(X));
+
+    J = mean(pos_term - neg_term);
+
+    grad = mean((hypothesis(X) - y).*X);
+
+    % =============================================================
+
+    end
+
+
 % Initialize some useful values
 m = length(y); % number of training examples
 
@@ -36,14 +75,15 @@ grad = zeros(size(theta));
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
 
+[J, grad] = costFunction(theta, X, y);
 
+cost_regularization_terms = lambda/(2*m) * sum(theta(2:end).^2);
 
+pd_regularization_terms = double(lambda)/m * theta;
+pd_regularization_terms(1) = 0; 
 
-
-
-
-
-
+J = J + cost_regularization_terms;
+grad = grad' + pd_regularization_terms;
 
 % =============================================================
 
