@@ -21,11 +21,21 @@ idx = zeros(size(X,1), 1);
 % Note: You can use a for-loop over the examples to compute this.
 %
 
+    function n = norm(u)
+        n = (sum(u.^2));
+    end
 
+centroid_run = zeros(K, 1);
 
-
-
-
+for example_index = 1:length(X)
+    for centroid_index = 1:K
+        j = norm(X(example_index, :) - centroids(centroid_index, :));
+        centroid_run(centroid_index) = j;
+    end
+    
+    [min_value, min_index] = min(centroid_run);
+    idx(example_index) = min_index;
+end
 
 % =============================================================
 
